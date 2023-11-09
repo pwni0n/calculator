@@ -32,8 +32,8 @@ function operate(op, a, b) {
     }
 }
 
-let num1 = 0;
-let num2 = 0;
+let num1 = "";
+let num2 = "";
 let operator = "";
 let canOverrideNum1 = false;
 
@@ -45,23 +45,24 @@ const display = document.querySelector(".display");
 
 function clearDisplay() {
     display.textContent = "0";
-    num1 = 0;
-    num2 = 0;
+    num1 = "";
+    num2 = "";
     operator = "";
 }
 
 function calculate() {
-    let result = operate(operator, +num1, +num2);
+    if (num2 === "") return;
+    let result = (num1 !== "") ? operate(operator, +num1, +num2) : num2;
 
     if (isNaN(result)) {
-        num1 = 0;
+        num1 = "";
     } else {
         result = Math.round(result * 1000) / 1000;
         num1 = result;
         canOverrideNum1 = true;
     }
     display.textContent = result;
-    num2 = 0;
+    num2 = "";
     operator = "";
 
     return result;
@@ -71,7 +72,7 @@ numBtns.forEach(button => {
     button.addEventListener("click", () => {
         if (canOverrideNum1 === true) {
             canOverrideNum1 = false;
-            num1 = 0;
+            num1 = "";
         }
         operator === "" ? num1 += button.textContent : num2 += button.textContent;
         operator === "" ? display.textContent = num1 : display.textContent = num2;

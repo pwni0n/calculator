@@ -21,8 +21,12 @@ function operate(op, a, b) {
             return add(a, b);
         case "-":
             return subtract(a, b);
+        case "X":
+        case "x":
         case "×":
+        case "*":
             return multiply(a, b);
+        case "/":
         case "÷":
             return divide(a, b);
         case "":
@@ -61,6 +65,7 @@ function calculate() {
         num1 = result;
         canOverrideNum1 = true;
     }
+
     display.textContent = result;
     num2 = "";
     operator = "";
@@ -68,25 +73,81 @@ function calculate() {
     return result;
 }
 
+function setNum(numToAssign) {
+    if (canOverrideNum1 === true) {
+        canOverrideNum1 = false;
+        num1 = "";
+    }
+
+    (operator === "") 
+    ? num1 += numToAssign
+    : num2 += numToAssign;
+
+    (operator === "")
+    ? display.textContent = num1
+    : display.textContent = num2;
+
+    display.textContent = +display.textContent; // unary + to get rid of leading 0's
+}
+
+function setOperator(opToAssign) {
+    if (operator !== "") calculate();
+    operator = opToAssign;
+    canOverrideNum1 = false;
+}
+
 numBtns.forEach(button => {
     button.addEventListener("click", () => {
-        if (canOverrideNum1 === true) {
-            canOverrideNum1 = false;
-            num1 = "";
-        }
-        operator === "" ? num1 += button.textContent : num2 += button.textContent;
-        operator === "" ? display.textContent = num1 : display.textContent = num2;
-        display.textContent = +display.textContent; // this is to remove any leading zeroes
+        setNum(button.textContent);
+    });
+
+    button.addEventListener("mousedown", (e) => {
+        e.preventDefault(); // prevents button focus
     });
 });
 
 opBtns.forEach(button => {
     button.addEventListener("click", () => {
-        if (operator !== "") calculate();
-        operator = button.textContent;
-        canOverrideNum1 = false;
+        setOperator(button.textContent);
+    });
+
+    button.addEventListener("mousedown", (e) => {
+        e.preventDefault(); // prevents button focus
     });
 });
 
+document.addEventListener("keydown", (e) => {
+    e.preventDefault();
+    if (e.key.match(/^[0-9]+$/)) {
+        setNum(e.key);
+
+    } else if (e.key.match(/^[+\-Xx×*/÷]+$/)) {
+        setOperator(e.key);
+
+    } else if (e.key === "Backspace") {
+        if (display.textContent.length > 1) {
+            display.textContent = display.textContent.slice(0, -1);
+            if (operator === "") {
+                num1 = +display.textContent;
+            } else {
+                num2 = +display.textContent;
+            }
+
+        } else {
+            if (operator === "") {
+                num1 = 0;
+            } else {
+                num2 = 0;
+            }
+            display.textContent = 0;
+
+        }
+    } else if (e.key === "Enter") {
+        calculate();
+    }
+});
+
 clearBtn.addEventListener("click", clearDisplay);
+clearBtn.addEventListener("mousedown", e => e.preventDefault());
 equalsBtn.addEventListener("click", calculate);
+equalsBtn.addEventListener("mousedown", e => e.preventDefault());

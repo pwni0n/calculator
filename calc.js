@@ -15,6 +15,10 @@ function divide(a, b) {
     return a / b;
 }
 
+function percent(a) {
+    return a / 100;
+}
+
 function operate(op, a, b) {
     switch (op) {
         case "+":
@@ -31,6 +35,8 @@ function operate(op, a, b) {
             return divide(a, b);
         case "":
             return a;
+        case "%":
+            return percent(a);
         default:
             return `Invalid operator: "${op}"`;
     }
@@ -45,6 +51,8 @@ const numBtns = document.querySelectorAll(".number");
 const opBtns = document.querySelectorAll(".operator");
 const clearBtn = document.querySelector(".clear");
 const equalsBtn = document.querySelector(".equals");
+const signBtn = document.querySelector(".sign");
+const percentBtn = document.querySelector(".percent");
 const display = document.querySelector(".display");
 
 function clearDisplay() {
@@ -94,6 +102,11 @@ function setOperator(opToAssign) {
     if (operator !== "") calculate();
     operator = opToAssign;
     canOverrideNum1 = false;
+}
+
+function flipSign(num) {
+    num *= -1;
+    display.textContent = num;
 }
 
 numBtns.forEach(button => {
@@ -151,3 +164,14 @@ clearBtn.addEventListener("click", clearDisplay);
 clearBtn.addEventListener("mousedown", e => e.preventDefault());
 equalsBtn.addEventListener("click", calculate);
 equalsBtn.addEventListener("mousedown", e => e.preventDefault());
+signBtn.addEventListener("click", () => {
+    if (operator !== "") {
+        flipSign(num1);
+    } else {
+        flipSign(num2);
+    }
+});
+
+percentBtn.addEventListener("click", () => {
+    display.textContent = operate("%", num1);
+})

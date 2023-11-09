@@ -36,8 +36,6 @@ body {
     box-sizing: border-box;
     box-shadow: 2px 2px 4px 0 inset;
     overflow: hidden;
-    text-overflow: ellipsis;
-    direction: rtl;
 }
 
 .buttons {

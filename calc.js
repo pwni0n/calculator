@@ -43,7 +43,7 @@ const equalsBtn = document.querySelector(".equals");
 const display = document.querySelector(".display");
 
 function clearDisplay() {
-    display.textContent = "";
+    display.textContent = "0";
     num1 = "";
     num2 = "";
     operator = "";
@@ -71,7 +71,7 @@ numBtns.forEach(button => {
     button.addEventListener("click", () => {
         operator === "" ? num1 += button.textContent : num2 += button.textContent;
         operator === "" ? display.textContent = num1 : display.textContent = num2;
-        if (display.textContent.startsWith("0")) display.textContent = display.textContent.slice(1);
+        display.textContent = +display.textContent;
     });
 });
 

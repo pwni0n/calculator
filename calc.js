@@ -15,8 +15,29 @@ function divide(a, b) {
     return a / b;
 }
 
-function percent(a) {
-    return a / 100;
+function percent(numArray) {
+    if (numArray[0] === "0" && !numArray.includes(".") || numArray[0] == undefined) return;
+
+    let number = Math.round((+(numArray.join("")) / 100) * 1000) / 1000;
+    updateDisplay(number);
+
+    while (numArray.length > 0) numArray.pop();
+
+    for (let num of number.toString()) {
+        numArray.push(num);
+    }
+}
+
+function changeSign(numArray) {
+    if (numArray[0] === "0" && !numArray.includes(".") || numArray[0] == undefined) return;
+
+    if (!numArray.includes("-")) {
+        numArray.unshift("-");
+    } else {
+        numArray.shift();
+    }
+
+    updateDisplay(numArray.join(""));
 }
 
 function operate(op, a, b) {
@@ -34,6 +55,7 @@ function operate(op, a, b) {
         case "÷":
             return divide(a, b);
         case "":
+        case undefined:
             return a;
         case "%":
             return percent(a);
@@ -42,136 +64,105 @@ function operate(op, a, b) {
     }
 }
 
-let num1 = "";
-let num2 = "";
-let operator = "";
-let canOverrideNum1 = false;
+function clearDisplay() {
+    while (num1.length > 0) num1.pop();
+    while (num2.length > 0) num2.pop();
+    operator.pop();
+    updateDisplay("0");
+}
+
+function updateDisplay(nums) {
+    display.textContent = nums;
+}
+
+function overrideNum(numArray, numbers) {
+    while (numArray.length > 0) numArray.pop();
+    for (let num of numbers) {
+        numArray.push(num);
+    }
+}
+
+function solve() {
+    let result = operate(operator[0], +(num1.join("")), +(num2.join("")));
+    if (!isNaN(result)) {
+        result = Math.round(result * 1000) / 1000;
+    }
+
+    overrideNum(num1, result.toString().split(""));
+    while (num2.length > 0) num2.pop();
+    operator.pop();
+    updateDisplay(result);
+}
+
+const num1 = [];
+const num2 = [];
+const operator = [];
 
 const numBtns = document.querySelectorAll(".number");
 const opBtns = document.querySelectorAll(".operator");
-const clearBtn = document.querySelector(".clear");
-const equalsBtn = document.querySelector(".equals");
 const signBtn = document.querySelector(".sign");
 const percentBtn = document.querySelector(".percent");
+const clearBtn = document.querySelector(".clear");
+const equalsBtn = document.querySelector(".equals");
+
 const display = document.querySelector(".display");
-
-function clearDisplay() {
-    display.textContent = "0";
-    num1 = "";
-    num2 = "";
-    operator = "";
-}
-
-function calculate() {
-    if (num2 === "") return;
-    let result = (num1 !== "") ? operate(operator, +num1, +num2) : num2;
-
-    if (isNaN(result)) {
-        num1 = "";
-    } else {
-        result = Math.round(result * 1000) / 1000;
-        num1 = result;
-        canOverrideNum1 = true;
-    }
-
-    display.textContent = result;
-    num2 = "";
-    operator = "";
-
-    return result;
-}
-
-function setNum(numToAssign) {
-    if (canOverrideNum1 === true) {
-        canOverrideNum1 = false;
-        num1 = "";
-    }
-
-    (operator === "") 
-    ? num1 += numToAssign
-    : num2 += numToAssign;
-
-    (operator === "")
-    ? display.textContent = num1
-    : display.textContent = num2;
-
-    display.textContent = +display.textContent; // unary + to get rid of leading 0's
-}
-
-function setOperator(opToAssign) {
-    if (operator !== "") calculate();
-    operator = opToAssign;
-    canOverrideNum1 = false;
-}
-
-function flipSign(num) {
-    num *= -1;
-    display.textContent = num;
-}
 
 numBtns.forEach(button => {
     button.addEventListener("click", () => {
-        setNum(button.textContent);
-    });
+        if (button.classList.contains("decimal")) {
+            if (operator.length > 0) {
+                if (num2.includes(".")) return;
+                
+                if (num2.length < 1) {
+                    num2.push("0");
+                }
+            } else {
+                if (num1.includes(".")) return;
 
-    button.addEventListener("mousedown", (e) => {
-        e.preventDefault(); // prevents button focus
+                if (num1.length < 1) {
+                    num1.push("0");
+                }
+            }
+        }
+
+        if (operator.length > 0) {
+            num2.push(button.textContent);
+            updateDisplay(num2.join(""));
+        } else {
+            num1.push(button.textContent);
+            updateDisplay(num1.join(""));
+        }
     });
 });
 
 opBtns.forEach(button => {
     button.addEventListener("click", () => {
-        setOperator(button.textContent);
-    });
-
-    button.addEventListener("mousedown", (e) => {
-        e.preventDefault(); // prevents button focus
+        if (num2.length > 0) solve();
+        operator[0] = button.textContent;
     });
 });
 
-document.addEventListener("keydown", (e) => {
-    e.preventDefault();
-    if (e.key.match(/^[0-9]+$/)) {
-        setNum(e.key);
-
-    } else if (e.key.match(/^[+\-Xx×*/÷]+$/)) {
-        setOperator(e.key);
-
-    } else if (e.key === "Backspace") {
-        if (display.textContent.length > 1) {
-            display.textContent = display.textContent.slice(0, -1);
-            if (operator === "") {
-                num1 = +display.textContent;
-            } else {
-                num2 = +display.textContent;
-            }
-
-        } else {
-            if (operator === "") {
-                num1 = 0;
-            } else {
-                num2 = 0;
-            }
-            display.textContent = 0;
-
-        }
-    } else if (e.key === "Enter") {
-        calculate();
-    }
-});
-
-clearBtn.addEventListener("click", clearDisplay);
-clearBtn.addEventListener("mousedown", e => e.preventDefault());
-equalsBtn.addEventListener("click", calculate);
-equalsBtn.addEventListener("mousedown", e => e.preventDefault());
 signBtn.addEventListener("click", () => {
-    if (operator !== "") {
-        flipSign(num1);
+    if (operator.length > 0) {
+        changeSign(num2);
     } else {
-        flipSign(num2);
+        changeSign(num1);
     }
 });
 
 percentBtn.addEventListener("click", () => {
-    display.textContent = operate("%", num1);
-})
+    if (operator.length > 0) {
+        percent(num2);
+    } else {
+        percent(num1);
+    }
+});
+
+clearBtn.addEventListener("click", clearDisplay);
+equalsBtn.addEventListener("click", () => {
+    if (num2.length > 0) {
+        solve();
+    } else {
+        display.textContent = num1.join("");
+    }
+});

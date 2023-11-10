@@ -16,7 +16,7 @@ function divide(a, b) {
 }
 
 function percent(numArray) {
-    if (numArray[0] === "0" && !numArray.includes(".") || numArray[0] == undefined) return;
+    if (numArray[0] === "0" && !numArray.includes(".") || numArray[0] == undefined || numArray.join("").match(/[a-zA-Z]/g)) return;
 
     let number = Math.round((+(numArray.join("")) / 100) * 1000) / 1000;
     updateDisplay(number);
@@ -29,7 +29,7 @@ function percent(numArray) {
 }
 
 function changeSign(numArray) {
-    if (numArray[0] === "0" && !numArray.includes(".") || numArray[0] == undefined) return;
+    if (numArray[0] === "0" && !numArray.includes(".") || numArray[0] == undefined || numArray.join("").match(/[a-zA-Z]/g)) return;
 
     if (!numArray.includes("-")) {
         numArray.unshift("-");
@@ -104,11 +104,16 @@ const signBtn = document.querySelector(".sign");
 const percentBtn = document.querySelector(".percent");
 const clearBtn = document.querySelector(".clear");
 const equalsBtn = document.querySelector(".equals");
-
 const display = document.querySelector(".display");
+
+let overridable = false;
+
+
 
 numBtns.forEach(button => {
     button.addEventListener("click", () => {
+        if (num1.join("").match(/[a-zA-Z]/g)) return;
+
         if (button.classList.contains("decimal")) {
             if (operator.length > 0) {
                 if (num2.includes(".")) return;
@@ -117,19 +122,39 @@ numBtns.forEach(button => {
                     num2.push("0");
                 }
             } else {
-                if (num1.includes(".")) return;
+                if (num1.includes(".") && overridable === false) return;
 
                 if (num1.length < 1) {
+                    num1.push("0");
+                } else if (num1.length >= 1 && overridable === true) {
+                    overridable = false;
+                    while (num1.length > 0) num1.pop();
                     num1.push("0");
                 }
             }
         }
 
+        if (button.classList.contains("zero")) {
+            if (operator.length > 0) {
+                if (num2[0] == 0 && !num2.includes(".")) return;
+            } else {
+                if (num1[0] == 0 && !num1.includes(".")) return;
+            }
+        } else {
+            
+        }
+
         if (operator.length > 0) {
             num2.push(button.textContent);
+            if (num2[0] == 0 && !num2.includes(".") && num2.length > 1) num2.shift();
             updateDisplay(num2.join(""));
         } else {
+            if (overridable) {
+                overridable = false;
+                while (num1.length > 0) num1.pop();
+            }
             num1.push(button.textContent);
+            if (num1[0] == 0 && !num1.includes(".") && num1.length > 1) num1.shift();
             updateDisplay(num1.join(""));
         }
     });
@@ -137,6 +162,7 @@ numBtns.forEach(button => {
 
 opBtns.forEach(button => {
     button.addEventListener("click", () => {
+        if (num1.join("").match(/[a-zA-Z]/g)) return;
         if (num2.length > 0) solve();
         operator[0] = button.textContent;
     });
@@ -162,6 +188,7 @@ clearBtn.addEventListener("click", clearDisplay);
 equalsBtn.addEventListener("click", () => {
     if (num2.length > 0) {
         solve();
+        overridable = true;
     } else {
         display.textContent = num1.join("");
     }

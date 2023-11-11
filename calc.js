@@ -94,6 +94,104 @@ function solve() {
     updateDisplay(result);
 }
 
+function updateNumberWithButton(button) {
+    if (num1.join("").match(/[a-zA-Z]/g)) return;
+
+    if (button.classList.contains("decimal")) {
+        if (operator.length > 0) {
+            if (num2.includes(".")) return;
+
+            if (num2.length < 1) {
+                num2.push("0");
+            }
+        } else {
+            if (num1.includes(".") && overridable === false) return;
+
+            if (num1.length < 1) {
+                num1.push("0");
+            } else if (num1.length >= 1 && overridable === true) {
+                overridable = false;
+                while (num1.length > 0) num1.pop();
+                num1.push("0");
+            }
+        }
+    }
+
+    if (button.classList.contains("zero")) {
+        if (operator.length > 0) {
+            if (num2[0] == 0 && !num2.includes(".")) return;
+        } else {
+            if (num1[0] == 0 && !num1.includes(".")) return;
+        }
+    }
+
+    if (operator.length > 0) {
+        num2.push(button.textContent);
+        if (num2[0] == 0 && !num2.includes(".") && num2.length > 1) num2.shift();
+        updateDisplay(num2.join(""));
+    } else {
+        if (overridable) {
+            overridable = false;
+            while (num1.length > 0) num1.pop();
+        }
+        num1.push(button.textContent);
+        if (num1[0] == 0 && !num1.includes(".") && num1.length > 1) num1.shift();
+        updateDisplay(num1.join(""));
+    }
+}
+
+function updateNumberWithKey(key) {
+    if (num1.join("").match(/[a-zA-Z]/g)) return;
+
+    if (key === ".") {
+        if (operator.length > 0) {
+            if (num2.includes(".")) return;
+
+            if (num2.length < 1) {
+                num2.push("0");
+            }
+        } else {
+            if (num1.includes(".") && overridable === false) return;
+
+            if (num1.length < 1) {
+                num1.push("0");
+            } else if (num1.length >= 1 && overridable === true) {
+                overridable = false;
+                while (num1.length > 0) num1.pop();
+                num1.push("0");
+            }
+        }
+    }
+
+    if (key === "0") {
+        if (operator.length > 0) {
+            if (num2[0] == 0 && !num2.includes(".")) return;
+        } else {
+            if (num1[0] == 0 && !num1.includes(".")) return;
+        }
+    }
+
+    if (operator.length > 0) {
+        num2.push(key);
+        if (num2[0] == 0 && !num2.includes(".") && num2.length > 1) num2.shift();
+        updateDisplay(num2.join(""));
+    } else {
+        if (overridable) {
+            overridable = false;
+            while (num1.length > 0) num1.pop();
+        }
+        num1.push(key);
+        if (num1[0] == 0 && !num1.includes(".") && num1.length > 1) num1.shift();
+        updateDisplay(num1.join(""));
+    }
+}
+
+function updateOperator(op) {
+    if (num1.join("").match(/[a-zA-Z]/g)) return;
+        if (num2.length > 0) solve();
+        operator[0] = op;
+}
+
 const num1 = [];
 const num2 = [];
 const operator = [];
@@ -108,67 +206,19 @@ const display = document.querySelector(".display");
 
 let overridable = false;
 
-
-
 numBtns.forEach(button => {
     button.addEventListener("click", () => {
-        if (num1.join("").match(/[a-zA-Z]/g)) return;
-
-        if (button.classList.contains("decimal")) {
-            if (operator.length > 0) {
-                if (num2.includes(".")) return;
-                
-                if (num2.length < 1) {
-                    num2.push("0");
-                }
-            } else {
-                if (num1.includes(".") && overridable === false) return;
-
-                if (num1.length < 1) {
-                    num1.push("0");
-                } else if (num1.length >= 1 && overridable === true) {
-                    overridable = false;
-                    while (num1.length > 0) num1.pop();
-                    num1.push("0");
-                }
-            }
-        }
-
-        if (button.classList.contains("zero")) {
-            if (operator.length > 0) {
-                if (num2[0] == 0 && !num2.includes(".")) return;
-            } else {
-                if (num1[0] == 0 && !num1.includes(".")) return;
-            }
-        } else {
-            
-        }
-
-        if (operator.length > 0) {
-            num2.push(button.textContent);
-            if (num2[0] == 0 && !num2.includes(".") && num2.length > 1) num2.shift();
-            updateDisplay(num2.join(""));
-        } else {
-            if (overridable) {
-                overridable = false;
-                while (num1.length > 0) num1.pop();
-            }
-            num1.push(button.textContent);
-            if (num1[0] == 0 && !num1.includes(".") && num1.length > 1) num1.shift();
-            updateDisplay(num1.join(""));
-        }
+        updateNumberWithButton(button);
     });
 });
 
 opBtns.forEach(button => {
-    button.addEventListener("click", () => {
-        if (num1.join("").match(/[a-zA-Z]/g)) return;
-        if (num2.length > 0) solve();
-        operator[0] = button.textContent;
+    button.addEventListener("click", (e) => {
+        updateOperator(button.textContent);
     });
 });
 
-signBtn.addEventListener("click", () => {
+signBtn.addEventListener("click", (e) => {
     if (operator.length > 0) {
         changeSign(num2);
     } else {
@@ -176,7 +226,7 @@ signBtn.addEventListener("click", () => {
     }
 });
 
-percentBtn.addEventListener("click", () => {
+percentBtn.addEventListener("click", (e) => {
     if (operator.length > 0) {
         percent(num2);
     } else {
@@ -185,11 +235,34 @@ percentBtn.addEventListener("click", () => {
 });
 
 clearBtn.addEventListener("click", clearDisplay);
-equalsBtn.addEventListener("click", () => {
+equalsBtn.addEventListener("click", (e) => {
     if (num2.length > 0) {
         solve();
         overridable = true;
     } else {
         display.textContent = num1.join("");
+    }
+});
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Backspace" || e.key === "Delete") {
+        clearDisplay();
+    } else if (e.key.match(/[0-9\.]/g)) {
+        updateNumberWithKey(e.key);
+    } else if (e.key.match(/[+\-*Xx×/÷]/g)) {
+        updateOperator(e.key);
+    } else if (e.key === "Enter") {
+        if (num2.length > 0) {
+            solve();
+            overridable = true;
+        } else {
+            display.textContent = num1.join("");
+        }
+    } else if (e.key === "%") {
+        if (operator.length > 0) {
+            percent(num2);
+        } else {
+            percent(num1);
+        }
     }
 });
